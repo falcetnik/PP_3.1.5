@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import ru.kata.spring.boot_security.demo.init.InitUserAndAdmin;
+import ru.kata.spring.boot_security.demo.mapper.UserMapper;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 
@@ -19,10 +20,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;
 
+    private final UserMapper userMapper;
+
     @Autowired
-    public WebSecurityConfig(SuccessUserHandler successUserHandler, UserService userService) {
+    public WebSecurityConfig(SuccessUserHandler successUserHandler, UserService userService, UserMapper userMapper) {
         this.successUserHandler = successUserHandler;
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     @Override

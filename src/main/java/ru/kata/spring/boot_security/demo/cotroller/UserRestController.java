@@ -29,22 +29,22 @@ public class UserRestController {
     }
 
     @GetMapping
-    public List<UserDto> getUsersList() {
-        List<UserDto> userDtos = new ArrayList<>();
-        List<User> users = userService.getAllUsersList();
-        for (User user : users) {
-            userDtos.add(new UserDto(user));
+    public ResponseEntity<List<UserDto>> getUsersList() {
+        if (userService.getUserDtoList().isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_MODIFIED)
+                    .body(userService.getUserDtoList());
         }
-        return userDtos;
+        return new ResponseEntity<>(userService.getUserDtoList(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public UserDto getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         User userCurrent = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (id == 0) {
-            return new UserDto(userCurrent);
+            return new ResponseEntity<>(new UserDto(userCurrent), HttpStatus.OK);
         }
-        return new UserDto(userService.getUserById(id));
+        return new ResponseEntity<>(new UserDto(userService.getUserById(id)), HttpStatus.OK);
     }
 
     @PostMapping
@@ -54,9 +54,7 @@ public class UserRestController {
                     .status(HttpStatus.NOT_MODIFIED)
                     .body(userDto);
         }
-        User user = userMapper.mapper(userDto);
-        userService.saveUser(user);
-        userDto.setId(user.getId());
+        userService.saveUser(userDto);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userDto);
@@ -69,8 +67,7 @@ public class UserRestController {
                     .status(HttpStatus.NOT_MODIFIED)
                     .body(userDto);
         }
-        User user = userMapper.mapper(userDto);
-        userService.updateUser(user);
+        userService.updateUser(userDto);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userDto);

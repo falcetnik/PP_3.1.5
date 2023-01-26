@@ -1,25 +1,17 @@
 package ru.kata.spring.boot_security.demo.service;
 
-import com.mysql.cj.xdevapi.Collection;
-import org.hibernate.Hibernate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.config.core.GrantedAuthorityDefaults;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.model.Role;
-import ru.kata.spring.boot_security.demo.repository.RoleRepository;
+import ru.kata.spring.boot_security.demo.dto.UserDto;
+import ru.kata.spring.boot_security.demo.mapper.UserMapper;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import ru.kata.spring.boot_security.demo.model.User;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,10 +21,13 @@ public class UserServiceImpl implements UserService {
 
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, RoleService roleService, @Lazy BCryptPasswordEncoder passwordEncoder) {
+    private final UserMapper userMapper;
+
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, @Lazy BCryptPasswordEncoder passwordEncoder, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -58,19 +53,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void saveUser(User user) {
+    public void saveUser(UserDto userDto) {
+        User user = userMapper.mapper(userDto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         roleService.saveRole(user.getRoles());
         userRepository.save(user);
+        userDto.setId(user.getId());
         System.out.println(user);
     }
 
     @Override
     @Transactional
-    public void updateUser(User user) {
+    public void updateUser(UserDto userDto) {
+        User user = userMapper.mapper(userDto);
         if (userRepository.existsById(user.getId())) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-            saveUser(user);
+            saveUser(userDto);
         }
     }
 
@@ -90,5 +88,16 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public User getUserById(Long id) {
         return userRepository.getReferenceById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDto> getUserDtoList() {
+        List<UserDto> userDtos = new ArrayList<>();
+        List<User> users = getAllUsersList();
+        for (User user : users) {
+            userDtos.add(new UserDto(user));
+        }
+        return userDtos;
     }
 }

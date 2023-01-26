@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot_security.demo.dto.UserDto;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
@@ -19,14 +20,16 @@ public interface UserService extends UserDetailsService {
     @Override
     UserDetails loadUserByUsername(String login) throws UsernameNotFoundException;
 
-    void saveUser(User user);
+    void saveUser(UserDto userDto);
 
-    void updateUser(User user);
+    void updateUser(UserDto userDto);
 
     void deleteUserById(long id);
 
     List<User> getAllUsersList();
 
     User getUserById(Long id);
+
+    List<UserDto> getUserDtoList();
 
 }

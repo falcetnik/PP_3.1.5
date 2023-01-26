@@ -22,7 +22,7 @@ public class AdminController {
     }
 
     @GetMapping
-    public String mainAdminPage(Model model){
+    public String getTemplateForAdminList(Model model){
         model.addAttribute("roles", roleService.getAllRoles());
         return "admin/admin";
     }
